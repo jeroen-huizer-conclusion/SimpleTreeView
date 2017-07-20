@@ -1,0 +1,51 @@
+div[class*=simpleTree]{
+    padding-top: 15px;
+}
+
+.stv_list {
+    list-style-type: none;  
+    padding-left: 10px;
+    padding-top: 0px;
+    margin: 0px;
+}
+
+.stv_list .stv_expandable {
+    background-repeat: no-repeat;
+    background-position: 0px 3px;
+    padding-left: 14px;
+    cursor: pointer;
+}
+
+.stv_list .stv_expandable.stv_expanded {
+    background-image: url(SimpleTreeView/widget/ui/collapse-chevron-small.png);
+}
+
+.stv_list .stv_expandable.stv_collapsed {
+    background-image: url(SimpleTreeView/widget/ui/expand-chevron-small.png);
+}
+
+.stv_list .stv_leaf {
+    padding-left: 14px;
+    cursor: default;
+}
+
+.stv_list li {
+    padding-top: 0px;
+    display: list-item;
+}
+
+.stv_list li span {
+    padding: 3px;
+}
+
+.stv_list li span.treeview-selected {
+    background-color: #B9D7DD;
+}
+
+.stv_list li span.stv_clickable {
+    cursor: pointer;
+}
+
+.stv_list li span.stv_nonclickable {
+    cursor: default;
+}

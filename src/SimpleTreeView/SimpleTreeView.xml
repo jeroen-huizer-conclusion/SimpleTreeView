@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<widget id="SimpleTreeView.widget.SimpleTreeView" needsEntityContext="false" xmlns="http://www.mendix.com/widget/1.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mendix.com/widget/1.0/ widget.xsd">
+    <name>SimpleTreeView</name>
+    <description>A simple tree view</description>
+    <icon>iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABoklEQVQ4T6WTzW5BURSF1+VyRYkSYtDEREKohImOTAjxDtfPM/RR+gjib8qAgUcwJAQDIWIkBoTrP9HsI+3tQZpod3IHd2ef76y1so+Qy+XO+EcJBMhms39C5PN5MEAmk8HxeIQkSTgcDtjv9zidTr9CLRYLCoWCCtBoNFC67xCf3yC9yOzwbrfDer2+C7LZbPcBP6efXj/QbDaZqq/S6/VwOp1wuVwqIJ1OQ6vVMgXXAEVRbhT0+32EQiEUi8WLBQJst1uYTCZueLFYoNvt3ihwOBxwu908YDKZYDQaIRaLoV6vg6QaDAaYzWasVisWMpVOp4PdbofH41EBqVQK4/GYffF4nFPRaDQQiUS4XrvdRjgcRqlUulggwHA4BKlIJBKoVqvsACmgtDebDaeAen6/nwcMBgNMp1Mkk0lUKhUGoL2wWq0MQHshiiL7p77X61UBsiyj1+thNpvdWKjVaohGowxIGc3nc6bK5/OhXC5fLBCg0+mwtJfLJSfXaDR+W6AAaQMp4EAgwANardZD7yEYDPKA8/mxRykIggp46Oqr4U+Y5esBSDgSaQAAAABJRU5ErkJggg==</icon>
+    <properties>
+ 
+        <property key="entities" type="object" isList="true" required="true">
+            <caption>Entities</caption>
+            <category>Configuration</category>
+            <description>Define all the types of objects that are displayed in the treeview here.</description>
+            <properties>
+                <property key="entity" type="entity" required="true">
+                    <caption>Entity</caption>
+                    <category>Common</category>
+                    <description>The entity used for this level.</description>
+                </property>
+
+                <property key="parent" type="entity" entityProperty="entity" isPath="optional" pathType="reference" required="false">
+                    <caption>Parent</caption>
+                    <category>Common</category>
+                    <description>The association from this entity type to the parent</description>
+                </property>
+
+                <property key="labelattr" type="attribute" entityProperty="entity" required="true">
+                    <caption>Label attribute</caption>
+                    <category>Common</category>
+                    <description>The attribute to use as label. Strings only here.</description>
+                    <attributeTypes>
+                        <attributeType name="String"/>
+                    </attributeTypes>
+                </property>
+
+                <property key="sortattr" type="attribute" entityProperty="entity" required="true">
+                    <caption>Sort attribute</caption>
+                    <category>Common</category>
+                    <description>Attribute to sort on, always ascending.</description>
+                    <attributeTypes>
+                        <attributeType name="AutoNumber"/>
+                        <attributeType name="Boolean"/>
+                        <attributeType name="Decimal"/>
+                        <attributeType name="DateTime"/>
+                        <attributeType name="Enum"/>
+                        <attributeType name="Integer"/>
+                        <attributeType name="Long"/>
+                        <attributeType name="String"/>
+                    </attributeTypes>
+                </property>
+
+                <property key="onclickform" type="form">
+                  <caption>On-click page</caption>
+                  <category>Common</category>
+                  <description>Page to show on click, will receive the object that user clicked on.</description>
+                </property>
+
+<!--                 <property key="onclickmicroflow" type="microflow">
+                  <caption>On-click microflow</caption>
+                  <category>Common</category>
+                  <description>Page to show on click, will receive the object that user clicked on.</description>
+                </property> -->
+
+
+            </properties>
+        </property>  
+
+    </properties>
+</widget>
