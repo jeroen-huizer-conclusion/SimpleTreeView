@@ -41,11 +41,78 @@ define([
             if(this.entities.length){
                 arrayUtil.forEach(this._findParentConfigs(), this._getParentObjects, this);
             }
+
+            this._drawFilters();
+        },
+
+        _recreate: function(){
+            this.objects = [];
+
+            domQuery("ul", this.domNode).orphan();
+            if(this.entities.length){
+                arrayUtil.forEach(this._findParentConfigs(), this._getParentObjects, this);
+            }
+        },
+
+        _drawFilters: function(){
+
+            // Can someone clean this up?
+
+            if(this.filters.length){
+
+                var filterGroup = "<div class='btn-group'>";
+                filterGroup += "<a class='dropdown=toggle' data-toggle='dropdown' href='#'>";
+                filterGroup += "<span class='glyphicon glyphicon-filter'/>";
+                filterGroup += "</a>";
+                filterGroup += "</div>";
+                filterGroup = domConstruct.toDom(filterGroup);
+                domConstruct.place(filterGroup, this.domNode);
+
+                this.connect(filterGroup, "click", lang.hitch(this, function toggleFilterContainer(node){
+                    if(domClass.contains(node, 'open'))
+                        domClass.remove(node, 'open');
+                    else
+                        domClass.add(node, 'open');
+                }, filterGroup));
+
+                var ul = domConstruct.create("ul."+this.listClass,{class:"dropdown-menu"} ,filterGroup);  
+
+                arrayUtil.forEach(this.filters, function(filter){
+
+                    var li = domConstruct.create("li", {}, ul);
+                    var formCheck = domConstruct.create("div",{class: "form-check"}, li);
+                    var label = domConstruct.create("label", {class:"form-check-label"}, formCheck);
+                    var cb = domConstruct.create("input", {class: "form-check-input" ,type:"checkbox", checked: filter.filteractive}, label);
+                    var txt = domConstruct.create("span", {innerHTML:filter.filterlabel}, label);
+
+                    this.connect(cb, "click", lang.hitch(this, function toggleFilter(filter, evt){
+                        filter.filteractive = !filter.filteractive;
+                        evt.stopPropagation();
+                    }, filter));
+
+                }, this);
+
+                var apply = "<li>";
+                // apply += "<a>";
+                apply += "<span><a>Toepassen</a></span>";
+                // apply += "</a>";
+                apply += "</li>";
+                apply = domConstruct.toDom(apply);
+
+                domConstruct.place(apply, ul);
+
+                this.connect(apply, "click", lang.hitch(this, this._recreate));
+            }
         },
 
         _getParentObjects: function(config){
             var xpath = "//"+config.entity;
-            xpath += config.constraint; // (e.g. currentdatetime)
+            xpath += config.constraint; // Not handling any tokens (e.g. currentdatetime).
+
+            arrayUtil.forEach(this._findActiveFilters(config), function(filter){
+                xpath += filter.filter; // Not handling any tokens (e.g. currentdatetime).
+            });
+
             var filter = {attributes: [config.labelattr], sort:[[config.sortattr, "asc"]]};
             this._getByXPath(xpath, filter, lang.hitch(this, this._getCallback));
         },
@@ -77,6 +144,11 @@ define([
         _findChildrenConfigs: function(config){
             // Find all configurations where parent refers to the given entity
             return arrayUtil.filter(this.entities, function(entityConfig){return entityConfig.parent.split("/")[1] == config.entity;});
+        },
+
+        _findActiveFilters: function(config){
+            // Find all filters for the related entity that are active
+            return arrayUtil.filter(this.filters, function(filter){return filter.filteractive && filter.filterentity == config.entity;});  
         },
 
         _getByXPath: function(xpath, filter, callback){
@@ -188,7 +260,9 @@ define([
                 });
             }
             evt.stopPropagation();
-        }
+        },
+
+
     })
 });
 

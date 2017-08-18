@@ -7,7 +7,7 @@
  
         <property key="entities" type="object" isList="true" required="true">
             <caption>Entities</caption>
-            <category>Configuration</category>
+            <category>Treedata</category>
             <description>Define all the types of objects that are displayed in the treeview here.</description>
             <properties>
                 <property key="entity" type="entity" required="true">
@@ -69,7 +69,7 @@
                     <caption>Lazy load children</caption>
                     <category>Advanced</category>
                     <description>If true, will not load children until node is folded open. Overrules 'Start expanded'</description>
-                </property>                  
+                </property>
 
 <!--                 <property key="onclickmicroflow" type="microflow">
                   <caption>On-click microflow</caption>
@@ -77,9 +77,41 @@
                   <description>Page to show on click, will receive the object that user clicked on.</description>
                 </property> -->
 
-
             </properties>
         </property>  
+
+        <property key="filters" type="object" isList="true" required="false">
+            <caption>Filters</caption>
+            <category>Filters</category>
+            <description>Define available filter for this entity.</description>
+            <properties>
+
+                <property key="filterentity" type="entity" required="true">
+                    <caption>Entity</caption>
+                    <category>Common</category>
+                    <description>Should be one of the entities in the Treedata.</description>
+                </property>
+
+                <property key="filter" type="entityConstraint" required="false" entityProperty="filterentity">
+                    <caption>Constraint</caption>
+                    <category>Common</category>
+                    <description>When activated, this constraint will be applied to the treedata.</description>
+                </property>
+
+                <property key="filterlabel" type="string" required="true">
+                    <caption>Label</caption>
+                    <category>Common</category>
+                    <description>Label to display.</description>
+                </property>
+
+                <property key="filteractive" type="boolean" defaultValue="false">
+                    <caption>Default active</caption>
+                    <category>Common</category>
+                    <description>If true, filter will be immediately applied.</description>
+                </property>
+
+            </properties>
+        </property>               
 
     </properties>
 </widget>
