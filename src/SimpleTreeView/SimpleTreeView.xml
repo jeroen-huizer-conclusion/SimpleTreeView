@@ -53,6 +53,18 @@
                   <description>Page to show on click, will receive the object that user clicked on.</description>
                 </property>
 
+                <property key="startexpanded" type="boolean" defaultValue="false">
+                    <caption>Start expanded</caption>
+                    <category>Common</category>
+                    <description>If true, node is expanded upon load.</description>
+                </property>  
+
+                <property key="lazyload" type="boolean" defaultValue="false">
+                    <caption>Lazy load children</caption>
+                    <category>Common</category>
+                    <description>If true, will not load children until node is folded open. Overrules 'Start expanded'</description>
+                </property>                  
+
 <!--                 <property key="onclickmicroflow" type="microflow">
                   <caption>On-click microflow</caption>
                   <category>Common</category>

@@ -30,6 +30,7 @@ div[class*=simpleTree]{
 }
 
 .stv_list li {
+    padding-left: 14px;
     padding-top: 0px;
     display: list-item;
 }
