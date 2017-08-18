@@ -47,21 +47,27 @@
                     </attributeTypes>
                 </property>
 
+                <property key="constraint" type="entityConstraint" required="false" entityProperty="entity">
+                    <caption>Constraint</caption>
+                    <category>Common</category>
+                    <description></description>
+                </property>
+
                 <property key="onclickform" type="form">
                   <caption>On-click page</caption>
-                  <category>Common</category>
+                  <category>Advanced</category>
                   <description>Page to show on click, will receive the object that user clicked on.</description>
                 </property>
 
                 <property key="startexpanded" type="boolean" defaultValue="false">
                     <caption>Start expanded</caption>
-                    <category>Common</category>
+                    <category>Advanced</category>
                     <description>If true, node is expanded upon load.</description>
                 </property>  
 
                 <property key="lazyload" type="boolean" defaultValue="false">
                     <caption>Lazy load children</caption>
-                    <category>Common</category>
+                    <category>Advanced</category>
                     <description>If true, will not load children until node is folded open. Overrules 'Start expanded'</description>
                 </property>                  
 

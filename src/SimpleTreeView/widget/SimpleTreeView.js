@@ -45,6 +45,7 @@ define([
 
         _getParentObjects: function(config){
             var xpath = "//"+config.entity;
+            xpath += config.constraint; // (e.g. currentdatetime)
             var filter = {attributes: [config.labelattr], sort:[[config.sortattr, "asc"]]};
             this._getByXPath(xpath, filter, lang.hitch(this, this._getCallback));
         },
@@ -55,6 +56,8 @@ define([
 
             arrayUtil.forEach(childConfigs, function(childConfig){
                 var xpath = "//"+childConfig.entity+"["+childConfig.parent.split("/")[0] + " = " +obj.getGuid() +"]";
+                xpath += childConfig.constraint; // Not handling any tokens (e.g. currentdatetime).
+
                 var filter = {attributes: [childConfig.labelattr], sort:[[childConfig.sortattr, "asc"]]};
                 this._getByXPath(xpath, filter, lang.hitch(this, this._getCallback, node)); // Adds parentnode to callback
             }, this);
