@@ -1,3 +1,6 @@
+/* global define, require, logger, mx, mendix, */ 
+"use strict";
+
 define([
     "dojo/_base/declare",
     "mxui/widget/_WidgetBase",
@@ -11,7 +14,6 @@ define([
     "dojo/NodeList-dom"
     ], 
     function (declare, _WidgetBase, dom, lang, arrayUtil, domClass, domConstruct, domQuery) {
-    "use strict";
 
     // Declare widget"s prototype.
     return declare("SimpleTreeView.widget.SimpleTreeView", [_WidgetBase], {
@@ -106,7 +108,7 @@ define([
 
         _findParentConfigs: function(){
             // Find all configurations where parent is empty
-            return arrayUtil.filter(this.entities, function(entityConfig){return !entityConfig.parent || entityConfig.parent.trim() === ''});
+            return arrayUtil.filter(this.entities, function(entityConfig){return !entityConfig.parent || entityConfig.parent.trim() === '';});
         },
 
         _findChildrenConfigs: function(config){
@@ -180,7 +182,7 @@ define([
                                         }, item);
 
             this._addNodeOnClick(obj, entityConfig, item, span);
-            return item
+            return item;
         },
 
         _addNodeOnClick: function(obj, config, item, span){
@@ -221,8 +223,7 @@ define([
                 mx.ui.openForm(config.onclickform, {
                         location: "content",
                         context: context,
-                        callback: lang.hitch(this, function(){this._lastClicked = object;}),
-                        error: function(){console.log(error);}
+                        callback: lang.hitch(this, function(){this._lastClicked = object;})
                 });
             }
             evt.stopPropagation();
@@ -244,9 +245,9 @@ define([
                 this.connect(btn, "click", lang.hitch(this, this._toggleDropdownMenu, btnGroup));
 
                 var dd = domConstruct.create("div", {class:"dropdown-menu"} ,btnGroup); 
-                var form = domConstruct.create("form", {class:"form container-fluid"}, dd)
+                var form = domConstruct.create("form", {class:"form container-fluid"}, dd);
 
-                arrayUtil.forEach(this.filters, function drawFilter(filter){this._drawFilter(filter, form)}, this);
+                arrayUtil.forEach(this.filters, function drawFilter(filter){this._drawFilter(filter, form);}, this);
 
                 var btnDiv = domConstruct.create("div", {class:"form-group"}, form);
                 var applyBtn = domConstruct.create("button", {type:"button", class:"btn btn-primary btn-block", innerHTML: this.applybtnlabel}, btnDiv);
@@ -278,7 +279,7 @@ define([
             evt.stopPropagation();
         },
 
-    })
+    });
 });
 
 require(["SimpleTreeView/widget/SimpleTreeView"]);
