@@ -111,7 +111,13 @@
                 </property>
 
             </properties>
-        </property>               
+        </property>
+
+        <property key="applybtnlabel" type="string" required="true" defaultValue="Apply">
+            <caption>Apply button</caption>
+            <category>Filters</category>
+            <description>A custom label for the apply button</description>
+        </property>
 
     </properties>
 </widget>

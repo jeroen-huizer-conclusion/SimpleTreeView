@@ -18,8 +18,23 @@ define([
 
         //Widget variables
         inputAttribute: null,       
-        entity: '',                 // entityname
-        parent: '',                 // association to parent
+        entities: [{
+            entity: "",
+            parent: "",
+            labelattr: "",
+            sortattr: "",
+            constraint: "",
+            onclickform: "",
+            startexpanded: false,
+            lazyload: false
+        }],
+        filters: [{
+            filterentity: "",
+            filter: "",
+            filterlabel: "",
+            filteractive: false
+        }],
+        applybtnlabel: "",
 
         //Local variable
         _objects: [],               // Holds all the objects in the treeview
@@ -54,57 +69,6 @@ define([
             }
         },
 
-        _drawFilters: function(){
-
-            // Can someone clean this up?
-
-            if(this.filters.length){
-
-                var filterGroup = "<div class='btn-group'>";
-                filterGroup += "<a class='dropdown=toggle' data-toggle='dropdown' href='#'>";
-                filterGroup += "<span class='glyphicon glyphicon-filter'/>";
-                filterGroup += "</a>";
-                filterGroup += "</div>";
-                filterGroup = domConstruct.toDom(filterGroup);
-                domConstruct.place(filterGroup, this.domNode);
-
-                this.connect(filterGroup, "click", lang.hitch(this, function toggleFilterContainer(node){
-                    if(domClass.contains(node, 'open'))
-                        domClass.remove(node, 'open');
-                    else
-                        domClass.add(node, 'open');
-                }, filterGroup));
-
-                var ul = domConstruct.create("ul."+this.listClass,{class:"dropdown-menu"} ,filterGroup);  
-
-                arrayUtil.forEach(this.filters, function(filter){
-
-                    var li = domConstruct.create("li", {}, ul);
-                    var formCheck = domConstruct.create("div",{class: "form-check"}, li);
-                    var label = domConstruct.create("label", {class:"form-check-label"}, formCheck);
-                    var cb = domConstruct.create("input", {class: "form-check-input" ,type:"checkbox", checked: filter.filteractive}, label);
-                    var txt = domConstruct.create("span", {innerHTML:filter.filterlabel}, label);
-
-                    this.connect(cb, "click", lang.hitch(this, function toggleFilter(filter, evt){
-                        filter.filteractive = !filter.filteractive;
-                        evt.stopPropagation();
-                    }, filter));
-
-                }, this);
-
-                var apply = "<li>";
-                // apply += "<a>";
-                apply += "<span><a>Toepassen</a></span>";
-                // apply += "</a>";
-                apply += "</li>";
-                apply = domConstruct.toDom(apply);
-
-                domConstruct.place(apply, ul);
-
-                this.connect(apply, "click", lang.hitch(this, this._recreate));
-            }
-        },
-
         _getParentObjects: function(config){
             var xpath = "//"+config.entity;
             xpath += config.constraint; // Not handling any tokens (e.g. currentdatetime).
@@ -124,6 +88,10 @@ define([
             arrayUtil.forEach(childConfigs, function(childConfig){
                 var xpath = "//"+childConfig.entity+"["+childConfig.parent.split("/")[0] + " = " +obj.getGuid() +"]";
                 xpath += childConfig.constraint; // Not handling any tokens (e.g. currentdatetime).
+
+                arrayUtil.forEach(this._findActiveFilters(childConfig), function(filter){
+                    xpath += filter.filter; // Not handling any tokens (e.g. currentdatetime).
+                });
 
                 var filter = {attributes: [childConfig.labelattr], sort:[[childConfig.sortattr, "asc"]]};
                 this._getByXPath(xpath, filter, lang.hitch(this, this._getCallback, node)); // Adds parentnode to callback
@@ -211,14 +179,14 @@ define([
                                             innerHTML: obj.get(entityConfig.labelattr)
                                         }, item);
 
-            this._addOnclick(obj, entityConfig, item, span);
+            this._addNodeOnClick(obj, entityConfig, item, span);
             return item
         },
 
-        _addOnclick: function(obj, config, item, span){
+        _addNodeOnClick: function(obj, config, item, span){
             var childConfigs = this._findChildrenConfigs(config);
             if(childConfigs.length){
-                this.connect(item, "click", lang.hitch(this, this._toggleHandler));            
+                this.connect(item, "click", lang.hitch(this, this._toggleChildNodes));            
                 if(config.lazyload){
                     this.connect(item, "click", lang.hitch(this, this._getChildObjects, obj, childConfigs, item));
                 }
@@ -226,24 +194,22 @@ define([
 
             if (config.onclickform) {
                 domClass.add(span, this.clickableClass);
-                this.connect(span, "click", lang.hitch(this, this._onClickForm, config));
+                this.connect(span, "click", lang.hitch(this, this._openFormForConfig, config));
             } else {
                 domClass.add(span, this.nonclickableClass);
             }
         },
 
-        _toggleHandler: function(evt){
-            this._toggleNode(evt.target);
+        _toggleChildNodes: function(evt){
+            var node = evt.target;
+            var dataid = node.attributes.dataid.value; // This causes some issues when the same data is displayed in two treeviews on the same page..
+            domQuery("li[dataid='"+ dataid + "']").toggleClass(this.expandedClass).toggleClass(this.collapsedClass);
+            domQuery("li[dataid='"+ dataid + "'] > ul").toggleClass("hidden");
+
             evt.stopPropagation();
         },
 
-        _toggleNode: function(node){
-            var dataid = node.attributes.dataid.value;
-            domQuery("li[dataid='"+ dataid + "']").toggleClass(this.expandedClass).toggleClass(this.collapsedClass);
-            domQuery("li[dataid='"+ dataid + "'] > ul").toggleClass("hidden");
-        },
-
-        _onClickForm: function(config, evt){
+        _openFormForConfig: function(config, evt){
             var dataid = evt.target.attributes.dataid.value;
             var object = this._objects[dataid];
             if(object != this._lastClicked){
@@ -262,6 +228,55 @@ define([
             evt.stopPropagation();
         },
 
+
+        /*
+        * Filters..
+        */
+
+        _drawFilters: function(){
+
+            if(this.filters.length){
+
+                var btnGroup = domConstruct.create("div", {class: "btn-group pull-right"}, this.domNode);
+                var btn = domConstruct.create("a", {class: 'dropdown-toggle', "data-toggle": "dropdown"}, btnGroup);
+                domConstruct.create("span", {class:"glyphicon glyphicon-filter"}, btn);
+
+                this.connect(btn, "click", lang.hitch(this, this._toggleDropdownMenu, btnGroup));
+
+                var dd = domConstruct.create("div", {class:"dropdown-menu"} ,btnGroup); 
+                var form = domConstruct.create("form", {class:"form container-fluid"}, dd)
+
+                arrayUtil.forEach(this.filters, function drawFilter(filter){this._drawFilter(filter, form)}, this);
+
+                var btnDiv = domConstruct.create("div", {class:"form-group"}, form);
+                var applyBtn = domConstruct.create("button", {type:"button", class:"btn btn-primary btn-block", innerHTML: this.applybtnlabel}, btnDiv);
+
+                this.connect(applyBtn, "click", lang.hitch(this, this._recreate));
+                this.connect(applyBtn, "click", lang.hitch(this, this._toggleDropdownMenu, btnGroup));
+            }
+        },
+
+        _toggleDropdownMenu: function(menuNode){
+            if(domClass.contains(menuNode, 'open'))
+                domClass.remove(menuNode, 'open');
+            else
+                domClass.add(menuNode, 'open');
+        },
+
+        _drawFilter: function(filter, formNode){
+            var id = Math.ceil(Math.random()*1000000+1);
+            var cbDiv = domConstruct.create("div", {class:"checkbox"}, formNode);
+            var label = domConstruct.create("label", {for: id, class: ""}, cbDiv);
+            var cb = domConstruct.create("input", {id: id ,type:"checkbox", checked: filter.filteractive}, label);
+            domConstruct.create("span", {innerHTML:filter.filterlabel}, label);
+
+            this.connect(cb, "click", lang.hitch(this, this._toggleFilter, filter));
+        },
+
+        _toggleFilter: function(filter, evt){
+            filter.filteractive = !filter.filteractive;
+            evt.stopPropagation();
+        },
 
     })
 });
