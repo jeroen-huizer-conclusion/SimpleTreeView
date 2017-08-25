@@ -59,6 +59,7 @@ define([
                 arrayUtil.forEach(this._findParentConfigs(), this._getParentObjects, this);
             }
 
+            this._checkFilters();
             this._drawFilters();
         },
 
@@ -247,7 +248,8 @@ define([
                 var dd = domConstruct.create("div", {class:"dropdown-menu"} ,btnGroup); 
                 var form = domConstruct.create("form", {class:"form container-fluid"}, dd);
 
-                arrayUtil.forEach(this.filters, function drawFilter(filter){this._drawFilter(filter, form);}, this);
+                // arrayUtil.forEach(this.filters, function drawFilter(filter){this._drawFilter(filter, form);}, this);
+                arrayUtil.forEach(this._collectFilterLabels(), function drawFilter(filterLabel){this._drawFilter(filterLabel, form);}, this);
 
                 var btnDiv = domConstruct.create("div", {class:"form-group"}, form);
                 var applyBtn = domConstruct.create("button", {type:"button", class:"btn btn-primary btn-block", innerHTML: this.applybtnlabel}, btnDiv);
@@ -264,19 +266,51 @@ define([
                 domClass.add(menuNode, 'open');
         },
 
-        _drawFilter: function(filter, formNode){
+        _checkFilters: function(){
+            arrayUtil.forEach(this._collectFilterLabels(), function alignFiltersByLabel(filterLabel){
+                var filterActive = this._checkActiveFilter(filterLabel);
+                arrayUtil.forEach(this._collectFiltersByLabel(filterLabel), function updateFilterActive(filter){
+                    filter.filteractive = filterActive;
+                });
+            }, this)
+        },
+
+        _drawFilter: function(filterLabel, formNode){
+
+            var isActive = this._checkActiveFilter(filterLabel);
+
             var id = Math.ceil(Math.random()*1000000+1);
             var cbDiv = domConstruct.create("div", {class:"checkbox"}, formNode);
             var label = domConstruct.create("label", {for: id, class: ""}, cbDiv);
-            var cb = domConstruct.create("input", {id: id ,type:"checkbox", checked: filter.filteractive}, label);
-            domConstruct.create("span", {innerHTML:filter.filterlabel}, label);
+            var cb = domConstruct.create("input", {id: id ,type:"checkbox", checked: isActive}, label);
+            domConstruct.create("span", {innerHTML:filterLabel}, label);
 
-            this.connect(cb, "click", lang.hitch(this, this._toggleFilter, filter));
+            this.connect(cb, "click", lang.hitch(this, this._toggleFilter, this._collectFiltersByLabel(filterLabel)));
         },
 
-        _toggleFilter: function(filter, evt){
-            filter.filteractive = !filter.filteractive;
+        _toggleFilter: function(filters, evt){
+            arrayUtil.forEach(filters, function(filter){
+                filter.filteractive = !filter.filteractive;
+            });
             evt.stopPropagation();
+        },
+
+        _collectFilterLabels: function(){
+            var labels = [];
+            arrayUtil.forEach(this.filters, function(filter){
+                if(arrayUtil.indexOf(labels, filter.filterlabel) < 0)
+                    labels.push(filter.filterlabel);
+            });
+            return labels;
+        },
+
+        _collectFiltersByLabel: function(filterLabel){
+            return arrayUtil.filter(this.filters, function(filter){return filter.filterlabel == filterLabel;});
+        },
+
+        _checkActiveFilter: function(filterLabel){
+            //Return true if any is active
+            return arrayUtil.some(this.filters, function(filter){return filter.filteractive && filter.filterlabel == filterLabel});
         },
 
     });
