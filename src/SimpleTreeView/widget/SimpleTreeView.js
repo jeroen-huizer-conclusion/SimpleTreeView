@@ -239,7 +239,7 @@ define([
 
             if(this.filters.length){
 
-                var btnGroup = domConstruct.create("div", {class: "stv-filter btn-group pull-right"}, this.domNode);
+                var btnGroup = domConstruct.create("div", {class: "stv_filter btn-group pull-right"}, this.domNode);
                 var btn = domConstruct.create("a", {class: 'dropdown-toggle', "data-toggle": "dropdown"}, btnGroup);
                 domConstruct.create("span", {class:"glyphicon glyphicon-filter"}, btn);
 
