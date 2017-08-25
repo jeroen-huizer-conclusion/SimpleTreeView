@@ -50,3 +50,7 @@ div[class*=simpleTree]{
 .stv_list li span.stv_nonclickable {
     cursor: default;
 }
+
+.stv_filter a{
+    margin-right: 10px;
+}
