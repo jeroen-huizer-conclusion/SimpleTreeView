@@ -1,4 +1,4 @@
-/* global define, require, logger, mx, mendix, */ 
+/* global define, require, logger, mx, mendix, */
 "use strict";
 
 define([
@@ -12,14 +12,14 @@ define([
     "dojo/dom-construct",
     "dojo/query",
     "dojo/NodeList-dom"
-    ], 
+    ],
     function (declare, _WidgetBase, dom, lang, arrayUtil, domClass, domConstruct, domQuery) {
 
     // Declare widget"s prototype.
     return declare("SimpleTreeView.widget.SimpleTreeView", [_WidgetBase], {
 
         //Widget variables
-        inputAttribute: null,       
+        inputAttribute: null,
         entities: [{
             entity: "",
             parent: "",
@@ -53,14 +53,12 @@ define([
         collapsedClass: "stv_collapsed",
 
         postCreate: function () {
-            logger.debug(this.id + ".postCreate"); 
+            logger.debug(this.id + ".postCreate");
 
             if(this.entities.length){
                 arrayUtil.forEach(this._findParentConfigs(), this._getParentObjects, this);
             }
-
-            this._checkFilters();
-            this._drawFilters();
+            this._initFilters();
         },
 
         _recreate: function(){
@@ -119,7 +117,7 @@ define([
 
         _findActiveFilters: function(config){
             // Find all filters for the related entity that are active
-            return arrayUtil.filter(this.filters, function(filter){return filter.filteractive && filter.filterentity == config.entity;});  
+            return arrayUtil.filter(this.filters, function(filter){return filter.filteractive && filter.filterentity == config.entity;});
         },
 
         _getByXPath: function(xpath, filter, callback){
@@ -147,7 +145,7 @@ define([
 
                 arrayUtil.forEach(objs, function addNode(obj){
                     var item = this._createNode(list, obj, entityConfig, childConfigs);
-                   
+
                     if(!entityConfig.lazyload){
                         this._getChildObjects(obj, childConfigs, item);
                     }
@@ -162,7 +160,7 @@ define([
         },
 
         _createNode: function(parentNode, obj, entityConfig, childConfigs){
-            var item = domConstruct.create("li", {class: this.itemClass, 
+            var item = domConstruct.create("li", {class: this.itemClass,
                                                     dataid: obj.getGuid(),
                                                     lazyload: entityConfig.lazyload
                                             }, parentNode);
@@ -177,8 +175,8 @@ define([
                 }
             }
 
-            var span = domConstruct.create("span", {class: this.spanClass, 
-                                            dataid: obj.getGuid(),  
+            var span = domConstruct.create("span", {class: this.spanClass,
+                                            dataid: obj.getGuid(),
                                             innerHTML: obj.get(entityConfig.labelattr)
                                         }, item);
 
@@ -189,7 +187,7 @@ define([
         _addNodeOnClick: function(obj, config, item, span){
             var childConfigs = this._findChildrenConfigs(config);
             if(childConfigs.length){
-                this.connect(item, "click", lang.hitch(this, this._toggleChildNodes));            
+                this.connect(item, "click", lang.hitch(this, this._toggleChildNodes));
                 if(config.lazyload){
                     this.connect(item, "click", lang.hitch(this, this._getChildObjects, obj, childConfigs, item));
                 }
@@ -235,6 +233,24 @@ define([
         * Filters..
         */
 
+        _initFilters: function(){
+            // Check if any settings exist.
+            // If so attach them here.
+            if(window.SimpleTreeViewSettings){
+                this._filterSettings = window.SimpleTreeViewSettings;
+            }
+            else{
+                this._filterSettings = {};
+                window.SimpleTreeViewSettings = this._filterSettings;
+            }
+
+            // Filters that have the same label are grouped to a single filter
+            // Make sure that all filters with the same label are active/inactive
+            this._checkFilters();
+            this._drawFilters();
+
+        },
+
         _drawFilters: function(){
 
             if(this.filters.length){
@@ -245,7 +261,7 @@ define([
 
                 this.connect(btn, "click", lang.hitch(this, this._toggleDropdownMenu, btnGroup));
 
-                var dd = domConstruct.create("div", {class:"dropdown-menu"} ,btnGroup); 
+                var dd = domConstruct.create("div", {class:"dropdown-menu"} ,btnGroup);
                 var form = domConstruct.create("form", {class:"form container-fluid"}, dd);
 
                 // arrayUtil.forEach(this.filters, function drawFilter(filter){this._drawFilter(filter, form);}, this);
@@ -268,10 +284,18 @@ define([
 
         _checkFilters: function(){
             arrayUtil.forEach(this._collectFilterLabels(), function alignFiltersByLabel(filterLabel){
-                var filterActive = this._checkActiveFilter(filterLabel);
+                var filterActive;
+                if(this._filterSettings[filterLabel]){
+                    filterActive = this._filterSettings[filterLabel];
+                } else {
+                    filterActive = this._checkActiveFilter(filterLabel);
+                    this._filterSettings[filterLabel] = filterActive;
+                }
                 arrayUtil.forEach(this._collectFiltersByLabel(filterLabel), function updateFilterActive(filter){
                     filter.filteractive = filterActive;
                 });
+
+
             }, this)
         },
 
@@ -285,13 +309,15 @@ define([
             var cb = domConstruct.create("input", {id: id ,type:"checkbox", checked: isActive}, label);
             domConstruct.create("span", {innerHTML:filterLabel}, label);
 
-            this.connect(cb, "click", lang.hitch(this, this._toggleFilter, this._collectFiltersByLabel(filterLabel)));
+            this.connect(cb, "click", lang.hitch(this, this._toggleFilter, filterLabel));
         },
 
-        _toggleFilter: function(filters, evt){
+        _toggleFilter: function(filterLabel, evt){
+            var filters = this._collectFiltersByLabel(filterLabel)
             arrayUtil.forEach(filters, function(filter){
                 filter.filteractive = !filter.filteractive;
             });
+            this._filterSettings[filterLabel] = !this._filterSettings[filterLabel];
             evt.stopPropagation();
         },
 
