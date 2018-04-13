@@ -216,7 +216,8 @@ define([
         _openFormForConfig: function(config, evt){
             var dataid = evt.target.attributes.dataid.value;
             var object = this._objects[dataid];
-            if(object != this._lastClicked){
+            // if(object != this._lastClicked){
+            if(object){
                 // What if this object is already in our session somewhere?
                 var context= new mendix.lib.MxContext();
                 context.setContext(object.getEntity(), object.getGuid());
