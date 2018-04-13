@@ -41,6 +41,9 @@ define([
         //Local variable
         _objects: [],               // Holds all the objects in the treeview
         _lastClicked: null,         // The object that is lastclicked
+        _filterSettings: {
+            activeCount: 0
+        },
 
         //Local static
         listClass: "stv_list",
@@ -243,6 +246,7 @@ define([
                 this._filterSettings = {};
                 window.SimpleTreeViewSettings = this._filterSettings;
             }
+            this._filterSettings.filterLabels = this._collectFilterLabels();
 
             // Filters that have the same label are grouped to a single filter
             // Make sure that all filters with the same label are active/inactive
@@ -258,6 +262,8 @@ define([
                 var btnGroup = domConstruct.create("div", {class: "stv_filter btn-group pull-right"}, this.domNode);
                 var btn = domConstruct.create("a", {class: 'dropdown-toggle', "data-toggle": "dropdown"}, btnGroup);
                 domConstruct.create("span", {class:"glyphicon glyphicon-filter"}, btn);
+                this._countNode = domConstruct.create("sub",{},btn);
+                this._updateFilterCount();
 
                 this.connect(btn, "click", lang.hitch(this, this._toggleDropdownMenu, btnGroup));
 
@@ -283,7 +289,8 @@ define([
         },
 
         _checkFilters: function(){
-            arrayUtil.forEach(this._collectFilterLabels(), function alignFiltersByLabel(filterLabel){
+
+            arrayUtil.forEach(this._filterSettings.filterLabels, function alignFiltersByLabel(filterLabel){
                 var filterActive;
                 if(this._filterSettings[filterLabel]){
                     filterActive = this._filterSettings[filterLabel];
@@ -291,10 +298,12 @@ define([
                     filterActive = this._checkActiveFilter(filterLabel);
                     this._filterSettings[filterLabel] = filterActive;
                 }
+
+                this._updateFilterCount();
+
                 arrayUtil.forEach(this._collectFiltersByLabel(filterLabel), function updateFilterActive(filter){
                     filter.filteractive = filterActive;
                 });
-
 
             }, this)
         },
@@ -317,7 +326,10 @@ define([
             arrayUtil.forEach(filters, function(filter){
                 filter.filteractive = !filter.filteractive;
             });
+
             this._filterSettings[filterLabel] = !this._filterSettings[filterLabel];
+            this._updateFilterCount(this._filterSettings[filterLabel]);
+
             evt.stopPropagation();
         },
 
@@ -338,6 +350,27 @@ define([
             //Return true if any is active
             return arrayUtil.some(this.filters, function(filter){return filter.filteractive && filter.filterlabel == filterLabel});
         },
+
+        _updateFilterCount: function(){
+
+            var activeCount = 0;
+            arrayUtil.forEach(this._filterSettings.filterLabels, function(filterLabel){
+                if(this._filterSettings[filterLabel]){
+                    activeCount += 1;
+                }
+            }, this);
+
+            this._filterSettings.activeCount = activeCount;
+            this._filterSettings.totalCount = this._filterSettings.filterLabels.length;
+
+            // var totalCount = this._filterSettings.totalCount ? this._filterSettings.totalCount : 0;
+            // this._filterSettings.totalCount = totalCount + 1
+
+            if(this._countNode){
+                this._countNode.innerText = this._filterSettings.activeCount;// + '/'+this._filterSettings.totalCount;
+            }
+
+        }
 
     });
 });
