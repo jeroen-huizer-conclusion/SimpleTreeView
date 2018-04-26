@@ -53,7 +53,7 @@
                     <description></description>
                 </property>
 
-                <property key="onclickform" type="form">
+                <property key="onclickform" type="form" required="false">
                   <caption>On-click page</caption>
                   <category>Advanced</category>
                   <description>Page to show on click, will receive the object that user clicked on.</description>
