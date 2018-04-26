@@ -4,7 +4,7 @@
     <description>A simple tree view</description>
     <icon>iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABoklEQVQ4T6WTzW5BURSF1+VyRYkSYtDEREKohImOTAjxDtfPM/RR+gjib8qAgUcwJAQDIWIkBoTrP9HsI+3tQZpod3IHd2ef76y1so+Qy+XO+EcJBMhms39C5PN5MEAmk8HxeIQkSTgcDtjv9zidTr9CLRYLCoWCCtBoNFC67xCf3yC9yOzwbrfDer2+C7LZbPcBP6efXj/QbDaZqq/S6/VwOp1wuVwqIJ1OQ6vVMgXXAEVRbhT0+32EQiEUi8WLBQJst1uYTCZueLFYoNvt3ihwOBxwu908YDKZYDQaIRaLoV6vg6QaDAaYzWasVisWMpVOp4PdbofH41EBqVQK4/GYffF4nFPRaDQQiUS4XrvdRjgcRqlUulggwHA4BKlIJBKoVqvsACmgtDebDaeAen6/nwcMBgNMp1Mkk0lUKhUGoL2wWq0MQHshiiL7p77X61UBsiyj1+thNpvdWKjVaohGowxIGc3nc6bK5/OhXC5fLBCg0+mwtJfLJSfXaDR+W6AAaQMp4EAgwANardZD7yEYDPKA8/mxRykIggp46Oqr4U+Y5esBSDgSaQAAAABJRU5ErkJggg==</icon>
     <properties>
- 
+
         <property key="entities" type="object" isList="true" required="true">
             <caption>Entities</caption>
             <category>Treedata</category>
@@ -63,13 +63,26 @@
                     <caption>Start expanded</caption>
                     <category>Advanced</category>
                     <description>If true, node is expanded upon load.</description>
-                </property>  
+                </property>
 
                 <property key="lazyload" type="boolean" defaultValue="false">
                     <caption>Lazy load children</caption>
                     <category>Advanced</category>
                     <description>If true, will not load children until node is folded open. Overrules 'Start expanded'</description>
                 </property>
+
+                <property key="includeEmpty" type="boolean" defaultValue="false">
+                    <caption>Include an 'Empty' option</caption>
+                    <category>Advanced</category>
+                    <description>If true, the tree will contain a node called 'Empty' it will contain all children that have no reference to an object of the parent type.</description>
+                </property>
+
+                <property key="emptyCaption" type="string" required="false">
+                    <caption>Empty label</caption>
+                    <category>Advanced</category>
+                    <description>The label of the 'Empty' option</description>
+                </property>
+
 
 <!--                 <property key="onclickmicroflow" type="microflow">
                   <caption>On-click microflow</caption>
@@ -78,7 +91,7 @@
                 </property> -->
 
             </properties>
-        </property>  
+        </property>
 
         <property key="filters" type="object" isList="true" required="false">
             <caption>Filters</caption>

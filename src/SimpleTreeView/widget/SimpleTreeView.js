@@ -28,7 +28,9 @@ define([
             constraint: "",
             onclickform: "",
             startexpanded: false,
-            lazyload: false
+            lazyload: false,
+            includeEmpty: false,
+            emptyCaption: 'Empty'
         }],
         filters: [{
             filterentity: "",
@@ -90,7 +92,14 @@ define([
                 return;
 
             arrayUtil.forEach(childConfigs, function(childConfig){
-                var xpath = "//"+childConfig.entity+"["+childConfig.parent.split("/")[0] + " = " +obj.getGuid() +"]";
+                var xpath = "//"+childConfig.entity;
+
+                if(obj){
+                    xpath += "["+childConfig.parent.split("/")[0] + " = " +obj.getGuid() +"]";
+                } else{
+                    xpath += "[not("+childConfig.parent + ")]";
+                }
+
                 xpath += childConfig.constraint; // Not handling any tokens (e.g. currentdatetime).
 
                 arrayUtil.forEach(this._findActiveFilters(childConfig), function(filter){
@@ -142,18 +151,21 @@ define([
                     domClass.add(list, "hidden");
                 }
 
+                // Store ids in array for later use
                 arrayUtil.forEach(objs, function storeObject(obj){
                     this._objects[obj.getGuid()] = obj;
                 }, this);
 
+                // Process each object
                 arrayUtil.forEach(objs, function addNode(obj){
-                    var item = this._createNode(list, obj, entityConfig, childConfigs);
-
-                    if(!entityConfig.lazyload){
-                        this._getChildObjects(obj, childConfigs, item);
-                    }
-
+                    this._addNode(obj, list, entityConfig, childConfigs);
                 },this);
+
+                // Process an empty object
+                if(entityConfig.includeEmpty){
+                    this._addNode(null, list, entityConfig, childConfigs);
+                }
+
             }
             else if(isChild){
                 domClass.remove(node, this.expandableClass);
@@ -162,9 +174,22 @@ define([
             node.attributes.loaded = true; // Prevents lazyloading more than once
         },
 
+        _addNode: function(obj, list, entityConfig, childConfigs){
+            var item = this._createNode(list, obj, entityConfig, childConfigs);
+
+            if(!entityConfig.lazyload){
+                this._getChildObjects(obj, childConfigs, item);
+            }
+        },
+
         _createNode: function(parentNode, obj, entityConfig, childConfigs){
+
+            // An empty object might be passed
+            var objGuid = obj ? obj.getGuid():'E'+Math.floor(Math.random()*100); // Random ID when object empty
+            var labelText = obj ? obj.get(entityConfig.labelattr) : entityConfig.emptyCaption;
+
             var item = domConstruct.create("li", {class: this.itemClass,
-                                                    dataid: obj.getGuid(),
+                                                    dataid: objGuid,
                                                     lazyload: entityConfig.lazyload
                                             }, parentNode);
 
@@ -179,8 +204,8 @@ define([
             }
 
             var span = domConstruct.create("span", {class: this.spanClass,
-                                            dataid: obj.getGuid(),
-                                            innerHTML: obj.get(entityConfig.labelattr)
+                                            dataid: objGuid,
+                                            innerHTML: labelText
                                         }, item);
 
             this._addNodeOnClick(obj, entityConfig, item, span);
