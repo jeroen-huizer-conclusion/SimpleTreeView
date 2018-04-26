@@ -3,7 +3,7 @@ div[class*=simpleTree]{
 }
 
 .stv_list {
-    list-style-type: none;  
+    list-style-type: none;
     padding-left: 10px;
     padding-top: 0px;
     margin: 0px;
@@ -32,6 +32,10 @@ div[class*=simpleTree]{
 .stv_list li {
     padding-left: 14px;
     padding-top: 0px;
+    display: none;
+}
+
+.stv_list li.stv_itemvisible {
     display: list-item;
 }
 

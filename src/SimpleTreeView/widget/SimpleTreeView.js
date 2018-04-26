@@ -52,6 +52,7 @@ define([
         itemClass: "stv_item",
         spanClass: "stv_span",
         expandableClass: "stv_expandable",
+        itemVisibleClass: "stv_itemvisible",
         clickableClass: "stv_clickable",
         nonclickableClass: "stv_nonclickable",
         expandedClass: "stv_expanded",
@@ -84,7 +85,7 @@ define([
             });
 
             var filter = {attributes: [config.labelattr], sort:[[config.sortattr, "asc"]]};
-            this._getByXPath(xpath, filter, lang.hitch(this, this._getCallback));
+            this._getByXPath(xpath, filter, lang.hitch(this, this._getCallback, config));
         },
 
         _getChildObjects: function(obj, childConfigs, node){
@@ -107,7 +108,7 @@ define([
                 });
 
                 var filter = {attributes: [childConfig.labelattr], sort:[[childConfig.sortattr, "asc"]]};
-                this._getByXPath(xpath, filter, lang.hitch(this, this._getCallback, node)); // Adds parentnode to callback
+                this._getByXPath(xpath, filter, lang.hitch(this, this._getCallback, node, childConfig)); // Adds parentnode to callback
             }, this);
         },
 
@@ -138,18 +139,24 @@ define([
 
         _getCallback: function(){
             //Parent node might be passed if available.
-            var isChild = arguments.length == 3;
+            var isChild = arguments.length == 4;
             var node = isChild ? arguments[0] : this.domNode;
-            var objs = isChild ? arguments[1] : arguments[0];
+            var entityConfig = isChild ? arguments[1] : arguments[0];
+            var objs = isChild ? arguments[2] : arguments[1];
 
             if(objs.length){
-                var entityConfig = this._findEntityConfig(objs[0].getEntity());
+                // var entityConfig = this._findEntityConfig(objs[0].getEntity());
                 var childConfigs = this._findChildrenConfigs(entityConfig);
 
                 var list = domConstruct.create("ul", {class: this.listClass}, node);
+
+                // What does this do again?!?
                 if(isChild && !node.lazyload && !domClass.contains(node, this.expandedClass)){
                     domClass.add(list, "hidden");
                 }
+
+                // Show node, since it has at least some children
+                this._showNode(node);
 
                 // Store ids in array for later use
                 arrayUtil.forEach(objs, function storeObject(obj){
@@ -160,16 +167,22 @@ define([
                 arrayUtil.forEach(objs, function addNode(obj){
                     this._addNode(obj, list, entityConfig, childConfigs);
                 },this);
-
-                // Process an empty object
-                if(entityConfig.includeEmpty){
-                    this._addNode(null, list, entityConfig, childConfigs);
-                }
-
             }
             else if(isChild){
+                // Can't expand something that does not have children
                 domClass.remove(node, this.expandableClass);
+
+                // Always show node, unless specified
+                if(!node.hideIfEmpty){
+                    this._showNode(node);
+                }
             }
+
+            // Process an empty object
+            if(entityConfig.includeEmpty){
+                this._addNode(null, list, entityConfig, childConfigs);
+            }
+
 
             node.attributes.loaded = true; // Prevents lazyloading more than once
         },
@@ -190,10 +203,11 @@ define([
 
             var item = domConstruct.create("li", {class: this.itemClass,
                                                     dataid: objGuid,
-                                                    lazyload: entityConfig.lazyload
+                                                    lazyload: entityConfig.lazyload,
+                                                    hideIfEmpty: entityConfig.hideIfEmpty
                                             }, parentNode);
 
-            if(childConfigs.length){
+            if(childConfigs && childConfigs.length){
                 domClass.add(item, this.expandableClass);
                 if(entityConfig.startexpanded && !entityConfig.lazyload){
                     domClass.add(item, this.expandedClass);
@@ -203,6 +217,11 @@ define([
                 }
             }
 
+            // When no cildConfig or if children are fetched later, show node
+            if(!childConfigs || !childConfigs.length || entityConfig.lazyload) {
+                this._showNode(item);
+            }
+
             var span = domConstruct.create("span", {class: this.spanClass,
                                             dataid: objGuid,
                                             innerHTML: labelText
@@ -210,6 +229,10 @@ define([
 
             this._addNodeOnClick(obj, entityConfig, item, span);
             return item;
+        },
+
+        _showNode: function(node){
+            domClass.add(node, this.itemVisibleClass);
         },
 
         _addNodeOnClick: function(obj, config, item, span){

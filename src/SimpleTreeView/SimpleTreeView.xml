@@ -83,6 +83,11 @@
                     <description>The label of the 'Empty' option</description>
                 </property>
 
+                <property key="hideIfEmpty" type="boolean" defaultValue="false">
+                    <caption>Hide if empty</caption>
+                    <category>Advanced</category>
+                    <description>If true, the node is invisble if no children are found (lazyload must be false).</description>
+                </property>
 
 <!--                 <property key="onclickmicroflow" type="microflow">
                   <caption>On-click microflow</caption>
