@@ -31,6 +31,15 @@
                     </attributeTypes>
                 </property>
 
+                <property key="altlabelattr" type="attribute" entityProperty="entity" required="true">
+                    <caption>Alternative label attribute</caption>
+                    <category>Common</category>
+                    <description>Alternative label, user can toggle views. Strings only here.</description>
+                    <attributeTypes>
+                        <attributeType name="String"/>
+                    </attributeTypes>
+                </property>
+
                 <property key="sortattr" type="attribute" entityProperty="entity" required="true">
                     <caption>Sort attribute</caption>
                     <category>Common</category>
@@ -136,6 +145,14 @@
             <category>Filters</category>
             <description>A custom label for the apply button</description>
         </property>
+
+        <property key="togglebuttonlabel" type="string" required="true" defaultValue="Toggle labels">
+            <caption>Toggle button title</caption>
+            <category>Treedata</category>
+            <description>Mouse over text of the label-toggle button</description>
+        </property>
+
+
 
     </properties>
 </widget>

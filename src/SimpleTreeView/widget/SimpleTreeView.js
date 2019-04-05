@@ -24,6 +24,7 @@ define([
             entity: "",
             parent: "",
             labelattr: "",
+            altlabelattr: "",
             sortattr: "",
             constraint: "",
             onclickform: "",
@@ -51,6 +52,7 @@ define([
         listClass: "stv_list",
         itemClass: "stv_item",
         spanClass: "stv_span",
+        altSpanClass: "stv_span_alt",
         expandableClass: "stv_expandable",
         itemVisibleClass: "stv_itemvisible",
         clickableClass: "stv_clickable",
@@ -65,6 +67,7 @@ define([
                 arrayUtil.forEach(this._findParentConfigs(), this._getParentObjects, this);
             }
             this._initFilters();
+            this._drawAltLabelToggle();
         },
 
         _recreate: function(){
@@ -84,7 +87,7 @@ define([
                 xpath += filter.filter; // Not handling any tokens (e.g. currentdatetime).
             });
 
-            var filter = {attributes: [config.labelattr], sort:[[config.sortattr, "asc"]]};
+            var filter = {attributes: [config.labelattr, config.altlabelattr], sort:[[config.sortattr, "asc"]]};
             this._getByXPath(xpath, filter, lang.hitch(this, this._getCallback, config));
         },
 
@@ -107,7 +110,7 @@ define([
                     xpath += filter.filter; // Not handling any tokens (e.g. currentdatetime).
                 });
 
-                var filter = {attributes: [childConfig.labelattr], sort:[[childConfig.sortattr, "asc"]]};
+                var filter = {attributes: [childConfig.labelattr, childConfig.altlabelattr], sort:[[childConfig.sortattr, "asc"]]};
                 this._getByXPath(xpath, filter, lang.hitch(this, this._getCallback, node, childConfig)); // Adds parentnode to callback
             }, this);
         },
@@ -200,6 +203,8 @@ define([
             // An empty object might be passed
             var objGuid = obj ? obj.getGuid():'E'+Math.floor(Math.random()*100); // Random ID when object empty
             var labelText = obj ? obj.get(entityConfig.labelattr) : entityConfig.emptyCaption;
+            var altLabelText = obj ? obj.get(entityConfig.altlabelattr) : labelText;
+            altLabelText = altLabelText.length ? altLabelText : labelText;
 
             var item = domConstruct.create("li", {class: this.itemClass,
                                                     dataid: objGuid,
@@ -225,6 +230,12 @@ define([
             var span = domConstruct.create("span", {class: this.spanClass,
                                             dataid: objGuid,
                                             innerHTML: labelText
+                                        }, item);
+
+            var altSpan = domConstruct.create("span", {class: this.altSpanClass,
+                                            dataid: objGuid,
+                                            innerHTML: altLabelText,
+                                            //style: {display: "none"}
                                         }, item);
 
             this._addNodeOnClick(obj, entityConfig, item, span);
@@ -308,7 +319,7 @@ define([
 
             if(this.filters.length){
 
-                var btnGroup = domConstruct.create("div", {class: "stv_filter btn-group pull-right"}, this.domNode);
+                var btnGroup = domConstruct.create("div", {class: "stv_button btn-group pull-right"}, this.domNode);
                 var btn = domConstruct.create("a", {class: 'dropdown-toggle', "data-toggle": "dropdown"}, btnGroup);
                 domConstruct.create("span", {class:"glyphicon glyphicon-filter"}, btn);
                 this._countNode = domConstruct.create("sub",{},btn);
@@ -419,7 +430,32 @@ define([
                 this._countNode.innerText = this._filterSettings.activeCount;// + '/'+this._filterSettings.totalCount;
             }
 
-        }
+        },
+
+        /*
+        * Alt-label toggle
+        */
+
+        _drawAltLabelToggle: function(){
+          var btnGroup = domConstruct.create("div", {class: "stv_button btn-group pull-right"}, this.domNode);
+          var btn = domConstruct.create("a",{title: this.togglebuttonlabel}, btnGroup);
+          domConstruct.create("span", {class:"glyphicon glyphicon-tags"}, btn);
+
+          this.connect(btn, "click", lang.hitch(this, this._toggleLabelDisplay, btn));
+        },
+
+        _toggleLabelDisplay: function(btnNode){
+
+          // Toggle button color
+
+          domClass.toggle(btnNode, 'text-warning');
+
+          // Toggle label in the treeview
+          domQuery("ul", this.domNode).forEach(function(node){domClass.toggle(node, 'alt_label');});
+
+        },
+
+
 
     });
 });

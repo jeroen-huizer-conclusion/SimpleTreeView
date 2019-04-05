@@ -55,6 +55,22 @@ div[class*=simpleTree]{
     cursor: default;
 }
 
-.stv_filter a{
+.stv_button a{
     margin-right: 10px;
 }
+
+/* Classes for alt-label display */
+
+.stv_span_alt{
+  display: none;
+}
+
+.stv_list.alt_label .stv_span_alt {
+  display: inline;
+}
+
+.stv_list.alt_label .stv_span {
+  display: none;
+}
+
+/* End Classes for alt-label display */
