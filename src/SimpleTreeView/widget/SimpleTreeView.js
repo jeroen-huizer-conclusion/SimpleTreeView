@@ -234,11 +234,12 @@ define([
 
             var altSpan = domConstruct.create("span", {class: this.altSpanClass,
                                             dataid: objGuid,
-                                            innerHTML: altLabelText,
-                                            //style: {display: "none"}
+                                            innerHTML: altLabelText
                                         }, item);
 
-            this._addNodeOnClick(obj, entityConfig, item, span);
+            this._addFoldOnClick(obj, entityConfig, item);
+            this._addNodeOnClick(obj, entityConfig, span);
+            this._addNodeOnClick(obj, entityConfig, altSpan);
             return item;
         },
 
@@ -246,15 +247,16 @@ define([
             domClass.add(node, this.itemVisibleClass);
         },
 
-        _addNodeOnClick: function(obj, config, item, span){
-            var childConfigs = this._findChildrenConfigs(config);
-            if(childConfigs.length){
-                this.connect(item, "click", lang.hitch(this, this._toggleChildNodes));
-                if(config.lazyload){
-                    this.connect(item, "click", lang.hitch(this, this._getChildObjects, obj, childConfigs, item));
-                }
-            }
-
+        _addFoldOnClick: function(obj, config, item){
+          var childConfigs = this._findChildrenConfigs(config);
+          if(childConfigs.length){
+              this.connect(item, "click", lang.hitch(this, this._toggleChildNodes));
+              if(config.lazyload){
+                  this.connect(item, "click", lang.hitch(this, this._getChildObjects, obj, childConfigs, item));
+              }
+          }
+        },
+        _addNodeOnClick: function(obj, config, span){
             if (config.onclickform) {
                 domClass.add(span, this.clickableClass);
                 this.connect(span, "click", lang.hitch(this, this._openFormForConfig, config));
